@@ -2,16 +2,19 @@ Quote of the Day App 📜
 Welcome to the Quote of the Day app, a Flutter-based mobile application that delivers daily inspiration through quotes fetched from zenquotes.io. With features like quote rating, favorites, history, search, and notifications, this app keeps you motivated while offering a sleek, user-friendly experience in both light and dark modes.
 Features ✨
 
-Daily Quotes: Fetches random quotes from zenquotes.io/api/random.
-Favorites: Save your favorite quotes with a single tap.
-Quote History: View up to 50 previously fetched quotes.
-Search Quotes: Search through your quote history by content or author.
+Daily Quotes: Fetches random quotes from zenquotes.io/api/random with retries and graceful fallback to built‑in quotes.
+Favorites: Save your favorite quotes with a single tap; manage and delete from the list.
+Quote History: View up to 50 previously fetched quotes; remove individual entries.
+Search Quotes: Search through your quote history by content or author with a minimum‑rating filter and quick clear.
 Quote Rating: Rate quotes from 1 to 5 stars, with ratings displayed in history and search.
 Daily Streaks: Tracks consecutive days you open the app, displayed in the app bar.
-Notifications: Receive daily quote notifications at a customizable time; includes a test notification feature.
-Dark/Light Mode: Toggle between themes for a personalized experience.
+Notifications: Receive daily quote notifications at a customizable time with exact/inexact scheduling and Android 13+ permission handling.
+Dark/Light Mode: Toggle instantly, plus pick System/Light/Dark mode in Settings (persisted across launches).
 Copy & Share: Copy quotes to clipboard or share as text or images.
-Offline Support: Displays cached quotes when offline with a clear status message.
+Offline & Resilience: Displays cached or fallback quotes when offline or API fails; shows clear error snackbars.
+Data Management: Export/Import all app data to/from JSON; Clear Data from Settings.
+Security & UX: Demo login (admin / admin123) with auto‑login and Logout.
+Production: Runtime error UI, lints enabled, safer time‑zone scheduling, permissions, and improved theming.
 Smooth Navigation: Built with GetX for seamless transitions between pages.
 
 Screenshots 📸
@@ -30,6 +33,12 @@ Search Page
 
 
 Note: Replace screenshots/ with actual screenshot paths after adding them to your repository.
+Production readiness notes 🧰
+- Requires Android permissions: INTERNET, ACCESS_NETWORK_STATE, SCHEDULE_EXACT_ALARM/USE_EXACT_ALARM (for exact scheduling), POST_NOTIFICATIONS (Android 13+).
+- On first notification enable, the app requests notification permission where applicable.
+- ErrorWidget and runZonedGuarded provide user‑friendly errors and catch uncaught exceptions.
+- Lint rules enabled via analysis_options.yaml.
+
 Getting Started 🚀
 Follow these steps to set up and run the Quote of the Day app locally.
 Prerequisites
@@ -100,7 +109,7 @@ Update android/app/src/main/AndroidManifest.xml:
 
 Usage 🛠️
 
-Login: Start at the login page (assumed) and navigate to the Home page.
+Login: Use the demo credentials to sign in: admin / admin123. Successful login is remembered across app launches. Use Settings > Logout (or the Home menu) to sign out.
 Home Page:
 View a daily quote fetched from zenquotes.io.
 Use action buttons to favorite, copy, share as text, or share as an image.
@@ -113,6 +122,7 @@ Settings Page:
 Toggle notifications and set a daily notification time.
 Test notifications (appears in 10 seconds).
 Switch between dark and light modes.
+Logout from your session.
 
 
 Search Page:

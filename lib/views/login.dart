@@ -13,13 +13,13 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  TextEditingController emailControler = TextEditingController();
-  TextEditingController passwordControler = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final _formkey = GlobalKey<FormState>();
   final RxBool _isLightTheme = false.obs;
+  bool _obscurePassword = true;
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
 
   Future<void> _getThemeStatus() async {
     var isLight = _prefs.then((SharedPreferences prefs) {
@@ -27,6 +27,25 @@ class LoginPageState extends State<LoginPage> {
     }).obs;
     _isLightTheme.value = (await isLight.value);
     Get.changeThemeMode(_isLightTheme.value ? ThemeMode.light : ThemeMode.dark);
+  }
+
+  Future<void> _attemptLogin() async {
+    if (!_formkey.currentState!.validate()) return;
+
+    final username = usernameController.text.trim();
+    final password = passwordController.text;
+
+    if (username == 'admin' && password == 'admin123') {
+      final prefs = await _prefs;
+      await prefs.setBool('is_logged_in', true);
+      await prefs.setString('username', username);
+      Get.offAll(() => const HomePage());
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid credentials. Try admin / admin123.')),
+      );
+    }
   }
 
   @override
@@ -37,130 +56,113 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: const [
-          // ObxValue(
-          //   (data) => Switch(
-          //     value: _isLightTheme.value,
-          //     onChanged: (val) {
-          //       _isLightTheme.value = val;
-          //       Get.changeThemeMode(
-          //         _isLightTheme.value ? ThemeMode.light : ThemeMode.dark,
-          //       );
-          //       _saveThemeStatus();
-          //     },
-          //   ),
-          //   false.obs,
-          // ),
-        ],
-      ),
-      body: Form(
-        key: _formkey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("A New Begining.",
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        fontSize: size.width * 0.1,
-                      )),
-              const SizedBox(
-                height: 100,
-              ),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image(
-                      width: 30, image: AssetImage('assets/icons/google.png')),
-                  SizedBox(width: 40),
-                  Image(
-                      width: 30, image: AssetImage('assets/icons/facebook.png'))
-                ],
-              ),
-              const SizedBox(
-                height: 50,
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Subtle background gradient
+            Positioned.fill(
+              child: Container(
                 decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColorLight,
-                    borderRadius: const BorderRadius.all(Radius.circular(20))),
-                child: TextFormField(
-                  controller: emailControler,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "Enter your email idiot.";
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                      border: InputBorder.none, hintText: "Email"),
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.04),
+                      Theme.of(context).colorScheme.secondary.withValues(alpha: 0.04),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColorLight,
-                    borderRadius: const BorderRadius.all(Radius.circular(20))),
-                child: TextFormField(
-                  controller: passwordControler,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "Enter your password idiot.";
-                    }
-                    return null;
-                  },
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      border: InputBorder.none, hintText: "Password"),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Text(
-                "Forgot Password?",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              MaterialButton(
-                onPressed: () => {
-                  if (_formkey.currentState!.validate())
-                    {Get.offAll(() => const HomePage())}
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Form(
+                    key: _formkey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 12),
+                        Text(
+                          'Quote App',
+                          style: Theme.of(context).textTheme.headlineLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Daily inspiration — sign in with demo credentials',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 32),
+                        TextFormField(
+                controller: usernameController,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your username.';
+                  }
+                  return null;
                 },
-                elevation: 0,
-                padding: const EdgeInsets.all(18),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                child: const Center(
-                    child: Text(
-                  "Login",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Center(
-                child: Text(
-                  "Create account",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  hintText: 'e.g., admin',
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
-              )
-            ],
-          ),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: passwordController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password.';
+                  }
+                  return null;
+                },
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+              ),
+                        const SizedBox(height: 8),
+                        Text('Demo login: admin / admin123', style: Theme.of(context).textTheme.labelMedium),
+                        const SizedBox(height: 24),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(onPressed: () {}, child: const Text('Forgot Password?')),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: _attemptLogin,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(onPressed: () {}, child: const Text('Create account')),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

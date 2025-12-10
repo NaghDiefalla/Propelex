@@ -10,8 +10,8 @@ ThemeData lightTheme = ThemeData(
         displayLarge: TextStyle(
             color: Colors.black, fontSize: 40, fontWeight: FontWeight.bold)),
     buttonTheme: const ButtonThemeData(
-            textTheme: ButtonTextTheme.primary, buttonColor: Colors.black),
-        colorScheme: ColorScheme(
+          textTheme: ButtonTextTheme.primary, buttonColor: Colors.black),
+          colorScheme: ColorScheme(
           brightness: Brightness.light,
           primary: AppColor.buttonBackgroundColor,
           onPrimary: Colors.white,
