@@ -33,7 +33,6 @@ Feel free to open issues, create pull requests, or suggest improvements to help 
 ## 📄 License
 
 This project is licensed under the **MIT License**.  
-See the `LICENSE` file for details.
 
 ---
 
@@ -41,6 +40,6 @@ See the `LICENSE` file for details.
 
 Built by **Nagh** using Flutter.  
 Powered by **zenquotes.io** for daily inspirational content.  
-For inquiries or feedback, please open an issue or contact **naghdiefalla@gmail.com**.
+For inquiries or feedback, please open an issue or contact **naghdiefalla@gmail.com** or **naghdiefalla@proton.me**.
 
 ---
